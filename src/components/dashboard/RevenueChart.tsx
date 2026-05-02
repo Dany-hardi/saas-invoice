@@ -36,26 +36,6 @@ export function RevenueChart({ invoices }: RevenueChartProps) {
         }));
     }, [invoices]);
 
-    const CustomTooltip = ({ active, payload, label }: {
-        active?: boolean;
-        payload?: Array<{ value: number }>;
-        label?: string;
-    }) => {
-        if (active && payload && payload.length) {
-            return (
-                <div
-                    className="card"
-                    style={{ padding: '0.5rem 1rem', minWidth: 120, boxShadow: 'var(--shadow-lg)' }}
-                >
-                    <p className="text-xs mb-1" style={{ color: 'var(--color-subtle)' }}>{label}</p>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--color-accent-2)', fontFamily: 'var(--font-mono)' }}>
-                        {formatCurrency(payload[0].value * 100)}
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
 
     return (
         <div className="card" style={{ height: 220 }}>
@@ -78,7 +58,7 @@ export function RevenueChart({ invoices }: RevenueChartProps) {
                         tickLine={false}
                         tickFormatter={v => `€${v}`}
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip formatter={(value) => formatCurrency(Number(value) * 100)} />
                     <Line
                         type="monotone"
                         dataKey="revenue"

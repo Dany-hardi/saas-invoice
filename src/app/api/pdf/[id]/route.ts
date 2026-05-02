@@ -60,7 +60,7 @@ export async function GET(
                 profile: (profile ?? {}) as Profile,
                 banking: banking as BankingDetails | null,
                 qrDataUrl,
-            }) as any
+            }) as unknown as Parameters<typeof renderToBuffer>[0]
         );
 
         return new NextResponse(new Uint8Array(pdfBuffer), {

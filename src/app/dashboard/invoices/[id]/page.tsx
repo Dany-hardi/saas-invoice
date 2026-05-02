@@ -9,6 +9,7 @@ import { useInvoice } from '@/hooks/useInvoice';
 import { Invoice } from '@/types/invoice';
 import { InvoiceStatusBadge } from '@/components/invoice/InvoiceStatusBadge';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useSound } from '@/components/shared/SoundProvider';
 
 export default function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -16,6 +17,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     const { fetchInvoiceById, updateInvoiceStatus, deleteInvoice } = useInvoice();
     const [invoice, setInvoice] = useState<Invoice | null>(null);
     const [loading, setLoading] = useState(true);
+    const { playSuccess } = useSound();
 
     useEffect(() => {
         fetchInvoiceById(id).then(data => {
@@ -85,6 +87,16 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                         <Download size={15} />
                         Download PDF
                     </a>
+                    <button
+                        onClick={async () => {
+                            await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ invoiceId: invoice.id }) });
+                            playSuccess();
+                            alert('Invoice sent to client');
+                        }}
+                        className="btn-ghost"
+                    >
+                        Send to Client
+                    </button>
                 </div>
             </div>
 

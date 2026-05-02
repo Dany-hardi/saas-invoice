@@ -1,8 +1,7 @@
 'use client';
 
-import { createContext, useContext, useCallback } from 'react';
-// We will use standard HTML5 Audio for simplicity and reliability without needing external assets immediately.
-// We can generate simple synthesized sounds.
+import { createContext, useContext } from 'react';
+import useSound from 'use-sound';
 
 interface SoundContextType {
     playClick: () => void;
@@ -12,52 +11,24 @@ interface SoundContextType {
 
 const SoundContext = createContext<SoundContextType | null>(null);
 
+const CLICK_URL = 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+const POP_URL = 'https://assets.mixkit.co/active_storage/sfx/1114/1114-preview.mp3';
+const SUCCESS_URL = 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3';
+
 export function SoundProvider({ children }: { children: React.ReactNode }) {
-    // Simple synthesizer for UI sounds
-    const playTone = useCallback((frequency: number, type: OscillatorType, duration: number, volume: number = 0.1) => {
-        try {
-            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-            if (!AudioContext) return;
+    const [playClick] = useSound(CLICK_URL, { volume: 0.2 });
+    const [playPop] = useSound(POP_URL, { volume: 0.15 });
+    const [playSuccess] = useSound(SUCCESS_URL, { volume: 0.2 });
 
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
-            osc.type = type;
-            osc.frequency.setValueAtTime(frequency, ctx.currentTime);
-
-            gain.gain.setValueAtTime(volume, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-
-            osc.start();
-            osc.stop(ctx.currentTime + duration);
-        } catch (e) {
-            // Ignore audio errors (e.g., user hasn't interacted with page yet)
-        }
-    }, []);
-
-    const playClick = useCallback(() => playTone(600, 'sine', 0.05, 0.05), [playTone]);
-    const playPop = useCallback(() => playTone(400, 'sine', 0.1, 0.05), [playTone]);
-    const playSuccess = useCallback(() => {
-        playTone(440, 'sine', 0.1, 0.05);
-        setTimeout(() => playTone(554, 'sine', 0.1, 0.05), 100);
-        setTimeout(() => playTone(659, 'sine', 0.2, 0.05), 200);
-    }, [playTone]);
-
-    return (
-        <SoundContext.Provider value={{ playClick, playSuccess, playPop }}>
-            {children}
-        </SoundContext.Provider>
-    );
+    return <SoundContext.Provider value={{ playClick, playSuccess, playPop }}>{children}</SoundContext.Provider>;
 }
 
-export function useSound() {
+export function useSoundContext() {
     const context = useContext(SoundContext);
     if (!context) {
-        throw new Error('useSound must be used within a SoundProvider');
+        throw new Error('useSoundContext must be used within a SoundProvider');
     }
     return context;
 }
+
+export { useSoundContext as useSound };

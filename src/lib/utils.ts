@@ -5,15 +5,20 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+const ZERO_DECIMAL_CURRENCIES = new Set(['XAF']);
+
 /**
  * Format cents to a currency string
  */
 export function formatCurrency(cents: number, currency = 'EUR'): string {
+    const useMinorUnits = !ZERO_DECIMAL_CURRENCIES.has(currency);
+
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency,
-        minimumFractionDigits: 2,
-    }).format(cents / 100);
+        minimumFractionDigits: useMinorUnits ? 2 : 0,
+        maximumFractionDigits: useMinorUnits ? 2 : 0,
+    }).format(useMinorUnits ? cents / 100 : cents);
 }
 
 /**
